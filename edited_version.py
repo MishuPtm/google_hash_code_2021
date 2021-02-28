@@ -78,8 +78,9 @@ def exportFile(intersections, fileName, min_intersection_score=-1):
     empty_inersections = []
     for intersectionId, streetNames in intersections.items():
         intersection_score = Street.get_intersection_score(streetNames)
+        avg = intersection_score / len(streetNames)
         for street in streetNames:
-            if Street.street_scores[street] == 0:
+            if Street.street_scores[street] < 1:
                 streetNames.remove(street)
 
         if len(streetNames) == 0:
@@ -107,10 +108,14 @@ def exportFile(intersections, fileName, min_intersection_score=-1):
             
             seconds = 1
 
-            if Street.streets[street].score > (avg * 2):
+            if Street.streets[street].score > (avg * 4):
+                seconds += 1
                 counter += 1
+            if Street.streets[street].score > (avg * 2):
+
                 seconds += 1
                 pass
+
             lines.append(f"{street} {seconds}\n")
 
     lines[-1] = lines[-1].replace("\n", "")
