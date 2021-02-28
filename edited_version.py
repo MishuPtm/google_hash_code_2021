@@ -5,7 +5,6 @@ class Street:
     intersections = defaultdict(list)
     streets = {}
     street_scores = {}
-    
 
     def __init__(self, line):
         parameters = line.strip().split()
@@ -78,7 +77,11 @@ def exportFile(intersections, fileName, min_intersection_score=-1):
     lines = []
     empty_inersections = []
     for intersectionId, streetNames in intersections.items():
-        intersection_score = Street.get_intersection_score(streetNames)       
+        intersection_score = Street.get_intersection_score(streetNames)
+        for street in streetNames:
+            if Street.street_scores[street] == 0:
+                streetNames.remove(street)
+
         if len(streetNames) == 0:
             empty_inersections.append(intersectionId)
         elif intersection_score < min_intersection_score:
@@ -89,6 +92,7 @@ def exportFile(intersections, fileName, min_intersection_score=-1):
         intersections.pop(intersection)
 
     lines.append(f"{len(intersections)}\n")
+    counter = 0
     for intersectionId, streetNames in intersections.items():
         lines.append(f"{intersectionId}\n")
         lines.append(f"{len(streetNames)}\n")
@@ -98,18 +102,21 @@ def exportFile(intersections, fileName, min_intersection_score=-1):
             
         intersection_score = Street.get_intersection_score(streetNames)
         avg = intersection_score / len(streetNames)
+
         for street in streetNames:
             
             seconds = 1
-            if Street.streets[street].score > (avg * 1.5):
+
+            if Street.streets[street].score > (avg * 2):
+                counter += 1
                 seconds += 1
-
+                pass
             lines.append(f"{street} {seconds}\n")
-    lines[-1] = lines[-1].replace("\n", "")
 
+    lines[-1] = lines[-1].replace("\n", "")
+    print(f"{counter} roads were higher than average")
     with open(fileName, "w") as f:
         f.writelines(lines)
-
 
 
 def importFile(filename):
@@ -143,6 +150,7 @@ def process(file):
         exportFile(Street.intersections, file+".out")
     Street.intersections = defaultdict(list)
     Car.cars_list = []
+    Street.street_scores = {}
 
 if __name__ == "__main__":
     files = ["a", "b", "c", "d", "e", "f"]
